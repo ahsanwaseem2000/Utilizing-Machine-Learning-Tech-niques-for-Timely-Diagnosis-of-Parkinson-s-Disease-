@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+# Load the dataset
+# Make sure to replace this with the path to your voice dataset
+data = pd.read_csv('path_to_your_voice_data.csv')
+
+# Data Preprocessing
+# Assuming 'class' is the column representing whether the person has Parkinson's (1) or not (0)
+X = data.drop('class', axis=1)  # Features
+y = data['class']  # Target variable
+
+# Standardize the data (important for SVM)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42)
+
+# Model 1: Support Vector Machine (SVM)
+svm_model = SVC(kernel='linear')
+svm_model.fit(X_train, y_train)
+
+# Model 2: Random Forest Classifier
+rf_model = RandomForestClassifier(n_estimators=100)
+rf_model.fit(X_train, y_train)
+
+# Predicting the results
+svm_predictions = svm_model.predict(X_test)
+rf_predictions = rf_model.predict(X_test)
+
+# Evaluate the models
+print("SVM Model Evaluation:")
+print("Accuracy:", accuracy_score(y_test, svm_predictions))
+print(classification_report(y_test, svm_predictions))
+
+print("Random Forest Model Evaluation:")
+print("Accuracy:", accuracy_score(y_test, rf_predictions))
+print(classification_report(y_test, rf_predictions))
+
+# Feature Importance using Random Forest
+feature_importance = rf_model.feature_importances_
+features = X.columns
+
+# Plot feature importance
+plt.figure(figsize=(10, 6))
+plt.barh(features, feature_importance)
+plt.title('Feature Importance in Parkinson’s Disease Detection')
+plt.xlabel('Importance')
+plt.ylabel('Features')
+plt.show()
